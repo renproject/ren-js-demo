@@ -33,8 +33,8 @@ const logLevel = LogLevel.Log;
 // Override RenJS's provider with staging darknode network.
 export const stagingRenJS = () => {
     const httpProvider = new HttpProvider<RenVMParams, RenVMResponses>(
-        // "https://lightnode-new-testnet.herokuapp.com/",
-        "http://34.239.188.210:18515", // tslint:disable-line: no-http-string
+        "https://lightnode-new-testnet.herokuapp.com/",
+        // "http://34.239.188.210:18515", // tslint:disable-line: no-http-string
     ) as Provider<RenVMParams, RenVMResponses>;
     const rpcProvider = new OverwriteProvider<RenVMParams, RenVMResponses>(
         httpProvider,
