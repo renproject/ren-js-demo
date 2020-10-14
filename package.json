@@ -10,7 +10,7 @@
         "test": "react-scripts test",
         "eject": "react-scripts eject",
         "predeploy": "$npm_execpath run build",
-        "deploy": "gh-pages -d build --repo git@github.com:renproject/gateway-staging.git",
+        "deploy": "gh-pages -d build --repo git@github.com:renproject/ren-js-demo.git",
         "link:all": "yarn link @renproject/rpc @renproject/interfaces @renproject/utils @renproject/chains-ethereum @renproject/chains-filecoin @renproject/ren",
         "unlink:all": "yarn unlink @renproject/rpc @renproject/interfaces @renproject/utils @renproject/chains-ethereum @renproject/chains-filecoin @renproject/ren"
     },
