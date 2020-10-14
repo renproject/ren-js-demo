@@ -2,7 +2,7 @@
 
 Simple UI to demo RenJS.
 
-<img height="400" alt="Gateway Example Screenshot" src="./screenshot.png" />
+<img height="400" alt="RenJS Demo Screenshot" src="./screenshot.png" />
 
 ## Running locally
 

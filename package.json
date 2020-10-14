@@ -2,7 +2,7 @@
     "name": "ren-js-example",
     "version": "2.0.0-alpha.0",
     "private": true,
-    "homepage": "https://renproject.github.io/gateway-staging",
+    "homepage": "https://renproject.github.io/ren-js-demo",
     "scripts": {
         "start": "react-scripts start",
         "clean": "yarn rimraf ./build",
