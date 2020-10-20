@@ -12,9 +12,18 @@ export const ethNetworkToRenNetwork = (id: number): RenNetwork => {
         1: RenNetwork.Mainnet,
         "0x01": RenNetwork.Mainnet,
         // 42: RenNetwork.Testnet,
-        // "0x42": RenNetwork.Testnet,
+        // "0x2a": RenNetwork.Testnet,
         4: RenNetwork.Testnet,
         "0x04": RenNetwork.Testnet,
+    }[id];
+};
+
+export const bscNetworkToRenNetwork = (id: number): RenNetwork => {
+    return {
+        56: RenNetwork.Mainnet,
+        "0x38": RenNetwork.Mainnet,
+        97: RenNetwork.Testnet,
+        "0x61": RenNetwork.Testnet,
     }[id];
 };
 
@@ -50,6 +59,7 @@ export const multiwalletOptions: WalletPickerConfig<any, any> = {
                 logo: Icons.BSC,
                 connector: new BinanceSmartChainInjectedConnector({
                     debug: true,
+                    networkIdMapper: bscNetworkToRenNetwork,
                 }),
             },
         ],
