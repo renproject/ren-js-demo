@@ -1,23 +1,26 @@
 {
   "files": {
-    "main.css": "/ren-js-demo/static/css/main.29edaf36.chunk.css",
-    "main.js": "/ren-js-demo/static/js/main.543073ec.chunk.js",
-    "main.js.map": "/ren-js-demo/static/js/main.543073ec.chunk.js.map",
-    "runtime-main.js": "/ren-js-demo/static/js/runtime-main.eddcf83a.js",
-    "runtime-main.js.map": "/ren-js-demo/static/js/runtime-main.eddcf83a.js.map",
-    "static/js/2.5bc5a8a1.chunk.js": "/ren-js-demo/static/js/2.5bc5a8a1.chunk.js",
-    "static/js/2.5bc5a8a1.chunk.js.map": "/ren-js-demo/static/js/2.5bc5a8a1.chunk.js.map",
+    "main.css": "/ren-js-demo/static/css/main.b15f5640.chunk.css",
+    "main.js": "/ren-js-demo/static/js/main.d3dc3c26.chunk.js",
+    "main.js.map": "/ren-js-demo/static/js/main.d3dc3c26.chunk.js.map",
+    "runtime-main.js": "/ren-js-demo/static/js/runtime-main.2e5297f7.js",
+    "runtime-main.js.map": "/ren-js-demo/static/js/runtime-main.2e5297f7.js.map",
+    "static/js/2.4e17a9b9.chunk.js": "/ren-js-demo/static/js/2.4e17a9b9.chunk.js",
+    "static/js/2.4e17a9b9.chunk.js.map": "/ren-js-demo/static/js/2.4e17a9b9.chunk.js.map",
+    "static/js/3.e5716b7f.chunk.js": "/ren-js-demo/static/js/3.e5716b7f.chunk.js",
+    "static/js/3.e5716b7f.chunk.js.map": "/ren-js-demo/static/js/3.e5716b7f.chunk.js.map",
     "index.html": "/ren-js-demo/index.html",
-    "precache-manifest.609ad71a9894c8012c654758d145265e.js": "/ren-js-demo/precache-manifest.609ad71a9894c8012c654758d145265e.js",
+    "precache-manifest.b736b483ad56dbc877693baae88f18d5.js": "/ren-js-demo/precache-manifest.b736b483ad56dbc877693baae88f18d5.js",
     "service-worker.js": "/ren-js-demo/service-worker.js",
-    "static/css/main.29edaf36.chunk.css.map": "/ren-js-demo/static/css/main.29edaf36.chunk.css.map",
-    "static/js/2.5bc5a8a1.chunk.js.LICENSE.txt": "/ren-js-demo/static/js/2.5bc5a8a1.chunk.js.LICENSE.txt",
+    "static/css/main.b15f5640.chunk.css.map": "/ren-js-demo/static/css/main.b15f5640.chunk.css.map",
+    "static/js/2.4e17a9b9.chunk.js.LICENSE.txt": "/ren-js-demo/static/js/2.4e17a9b9.chunk.js.LICENSE.txt",
+    "static/js/3.e5716b7f.chunk.js.LICENSE.txt": "/ren-js-demo/static/js/3.e5716b7f.chunk.js.LICENSE.txt",
     "static/media/metamask.svg": "/ren-js-demo/static/media/metamask.3fcae91e.svg"
   },
   "entrypoints": [
-    "static/js/runtime-main.eddcf83a.js",
-    "static/js/2.5bc5a8a1.chunk.js",
-    "static/css/main.29edaf36.chunk.css",
-    "static/js/main.543073ec.chunk.js"
+    "static/js/runtime-main.2e5297f7.js",
+    "static/js/2.4e17a9b9.chunk.js",
+    "static/css/main.b15f5640.chunk.css",
+    "static/js/main.d3dc3c26.chunk.js"
   ]
 }
