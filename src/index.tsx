@@ -5,11 +5,15 @@ import "./ui/styles/index.scss";
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 
+import { MultiwalletProvider } from "@renproject/multiwallet-ui";
+
 import { Main } from "./ui/main";
 
 const render = (Main: () => JSX.Element) => {
     ReactDOM.render(
-        <div className="test-background">{<Main />}</div>,
+        <MultiwalletProvider>
+            <div className="main">{<Main />}</div>
+        </MultiwalletProvider>,
         document.getElementById("root") as HTMLElement,
     );
 };

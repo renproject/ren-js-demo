@@ -6,6 +6,7 @@ import { Loading } from "@renproject/react-components";
 import { TxStatus } from "@renproject/interfaces";
 
 import { DepositStatus, handleDeposit, submitDeposit } from "../lib/mint";
+import { BurnDetails, DepositDetails } from "./useTransactionStorage";
 
 export const ExternalLink: React.FC<React.AnchorHTMLAttributes<
     HTMLAnchorElement
@@ -19,14 +20,17 @@ interface Props {
     txHash: string;
     deposit: LockAndMintDeposit;
     status: DepositStatus;
-    updateStatus: (txHash: string, status: DepositStatus) => void;
+    updateTransaction: (
+        txHash: string,
+        transaction: Partial<BurnDetails> | Partial<DepositDetails>,
+    ) => void;
 }
 
 export const DepositObject: React.FC<Props> = ({
     txHash,
     deposit,
     status,
-    updateStatus,
+    updateTransaction,
 }) => {
     const { asset, from, to } = deposit._params;
     const { amount } = deposit.depositDetails;
@@ -43,9 +47,9 @@ export const DepositObject: React.FC<Props> = ({
 
     const onStatus = React.useCallback(
         (newStatus: DepositStatus) => {
-            updateStatus(txHash, newStatus);
+            updateTransaction(txHash, { status: newStatus });
         },
-        [updateStatus, txHash],
+        [updateTransaction, txHash],
     );
 
     // Confirmations
@@ -164,26 +168,6 @@ export const DepositObject: React.FC<Props> = ({
                     )}
                 </p>
             ) : null}
-            {status === DepositStatus.CONFIRMED && renVMStatus ? (
-                <p>
-                    <b>RenVM status:</b> {renVMStatus}
-                </p>
-            ) : null}
-            {status === DepositStatus.DETECTED && confirmations !== null ? (
-                <p>
-                    <b>Confirmations:</b> {confirmations}/{targetConfirmations}
-                </p>
-            ) : null}
-            {status === DepositStatus.SIGNED ? (
-                <button disabled={submitting} onClick={step2} className="blue">
-                    {submitting ? <Loading /> : <>Submit to {to.name}</>}
-                </button>
-            ) : null}
-            {status === DepositStatus.ERROR ? (
-                <button disabled={submitting} onClick={step1} className="blue">
-                    Retry
-                </button>
-            ) : null}
             {mintTransaction ? (
                 <p>
                     <b>{to.name} tx:</b>{" "}
@@ -197,6 +181,34 @@ export const DepositObject: React.FC<Props> = ({
                         mintTransaction
                     )}
                 </p>
+            ) : null}
+            {status === DepositStatus.CONFIRMED && renVMStatus ? (
+                <p>
+                    <b>RenVM status:</b> {renVMStatus}
+                </p>
+            ) : null}
+            {status === DepositStatus.DETECTED && confirmations !== null ? (
+                <p>
+                    <b>Confirmations:</b> {confirmations}/{targetConfirmations}
+                </p>
+            ) : null}
+            {status === DepositStatus.SIGNED ? (
+                <button
+                    disabled={submitting}
+                    onClick={step2}
+                    className="button blue"
+                >
+                    {submitting ? <Loading /> : <>Submit to {to.name}</>}
+                </button>
+            ) : null}
+            {status === DepositStatus.ERROR ? (
+                <button
+                    disabled={submitting}
+                    onClick={step1}
+                    className="button blue"
+                >
+                    Retry
+                </button>
             ) : null}
             {errorMessage ? (
                 <div className="red" onClick={showFullError}>

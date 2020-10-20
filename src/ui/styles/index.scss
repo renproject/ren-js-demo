@@ -6,13 +6,7 @@ html {
     min-height: 100vh;
 }
 
-.box-blue {
-    color: $blue;
-    font-family: monospace;
-    font-size: 12px;
-}
-
-.test-background {
+.main {
     background-position: 0px -30vh;
     background-repeat: no-repeat;
     background-image: radial-gradient(
@@ -22,295 +16,323 @@ html {
     );
     min-height: 100vh;
     padding-top: 70px;
-}
 
-.loading {
-    margin-left: 5px;
-    margin-right: 5px;
-}
-
-.copy {
-    cursor: pointer;
-
-    &:hover,
-    &.copied {
+    .box-blue {
         color: $blue;
-    }
-}
-
-.test-environment {
-    padding: 20px;
-    margin: 0 auto;
-    max-width: 500px;
-    background: white;
-
-    box-shadow: rgba(0, 0, 0, 0.02) 0px -2px 1px,
-        rgba(0, 0, 0, 0.08) 0px 4px 8px, rgba(0, 0, 0, 0.08) 0px 16px 24px,
-        rgba(0, 0, 0, 0.02) 0px 24px 32px;
-    border-radius: 30px;
-    text-align: center;
-
-    &.disabled > input {
-        opacity: 0.6;
+        font-family: monospace;
+        font-size: 12px;
     }
 
-    > * {
-        margin-bottom: 10px;
-
-        &:last-child {
-            margin-bottom: 0;
+    input,
+    button {
+        &:active,
+        &:focus {
+            outline: none;
         }
     }
-}
 
-.box {
-    min-height: 60px;
-    border: 1px solid rgb(237, 238, 240);
-    border-radius: 12px;
-    padding: 10px;
-    display: flex;
-    align-items: center;
-
-    p:last-child {
-        margin-bottom: 0;
-    }
-
-    &.testnet-warning {
-        height: 46px;
-        min-height: unset;
-        border-color: $red;
-        color: $red;
-        display: flex;
-        justify-content: center;
-        position: absolute;
-        top: 15px;
-        right: 15px;
-    }
-}
-
-.box-action {
-    cursor: pointer;
-    width: 60px;
-
-    &.disabled {
-        opacity: 0.6;
-        cursor: initial;
-    }
-}
-
-select {
-    height: 50px;
-    width: 100%;
-    text-align: center;
-}
-
-.send {
-    display: flex;
-    flex-flow: row;
-    flex-grow: 2;
-
-    + .send {
-        margin-top: 5px;
-    }
-
-    > .box {
-        border-left: 0;
-    }
-
-    input {
-        flex-grow: 2;
-        border-top-right-radius: 0;
-        border-bottom-right-radius: 0;
-    }
-
-    .no-right-border {
-        border-right: 0;
-        border-top-right-radius: 0;
-        border-bottom-right-radius: 0;
-    }
-
-    .no-left-border {
-        border-left: 0;
-        border-top-left-radius: 0;
-        border-bottom-left-radius: 0;
-    }
-
-    > .send > .box {
-        height: 46px;
-        border-left: 0;
-        border-radius: 0;
-    }
-
-    svg {
-        width: 22px;
-        height: 22px;
-    }
-}
-
-div.tab {
-    font-weight: 100;
-    background: none;
-    width: 50%;
-    display: inline-block;
-    border: 1px solid rgb(237, 238, 240);
-    padding: 10px;
-    border-top-left-radius: 12px;
-
-    &:hover {
-        cursor: pointer;
-    }
-
-    &.disabled {
-        cursor: not-allowed;
-    }
-
-    &.tab--selected {
-        font-weight: 900;
-        border-bottom: none;
-    }
-
-    + .tab {
-        border-top-left-radius: 0px;
-        border-top-right-radius: 12px;
-
-        border-left: 0;
-    }
-}
-
-form {
-    padding: 10px;
-}
-
-.form-outer {
-    border: 1px solid rgb(237, 238, 240);
-    border-top: none;
-    padding: 5px;
-    margin-bottom: 30px;
-    margin-top: -15px;
-    border-bottom-left-radius: 12px;
-    border-bottom-right-radius: 12px;
-}
-
-input {
-    height: 46px;
-    border-radius: 12px;
-    width: 100%;
-    border: 1px solid rgb(237, 238, 240);
-    padding: 0 10px;
-}
-
-form {
-    input {
-        height: 60px;
-    }
-}
-
-.red {
-    color: $red;
-    border-color: $red;
-}
-
-.blue {
-    color: $blue;
-    border-color: $blue;
-}
-
-button {
-    width: 100%;
-    height: 60px;
-    margin: 0 auto;
-    padding: 0 20px;
-    border: none;
-    margin-bottom: 5px;
-    border-radius: 12px;
-    line-height: 250%;
-    border: 1px solid #aaa;
-    font-size: 18px;
-    letter-spacing: 1px;
-
-    &.blue {
-        background: $blue;
-        color: white;
-        border: 1px solid darken($color: $blue, $amount: 10);
-    }
-
-    padding-top: 3px;
-
-    &:not(.disabled):active {
-        background: $blue;
-        color: white;
-        font-weight: 900;
-    }
-
-    &:disabled,
-    &.disabled {
-        background: #0070e8aa;
-        // background: #eee;
-        border: 1px solid darken($color: #eee, $amount: 10);
-        cursor: not-allowed;
-    }
-}
-
-.deposit-address {
-    @extend .box;
-    display: block;
-    padding: 15px;
-    // padding: 5px;
-
-    text-align: left;
-    p {
-        margin: 0;
-        overflow-x: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-    }
-}
-
-.deposit-loading {
-    opacity: 0.5;
-    margin-top: 15px;
     .loading {
-        opacity: 0.3;
+        margin-left: 5px;
+        margin-right: 5px;
     }
-}
 
-.Select--currency__control {
-    border-radius: 12px !important;
-}
+    .copy {
+        cursor: pointer;
 
-.Select--currency__value-container {
-    height: 44px;
-}
+        &:hover,
+        &.copied {
+            color: $blue;
+        }
+    }
 
-.Select--currency__single-value,
-.Select--currency__input {
-    margin-top: -5px;
-}
+    .test-environment {
+        padding: 20px;
+        margin: 0 auto;
+        max-width: 500px;
+        background: white;
 
-.deposits {
-    margin-top: 30px;
-    padding-bottom: 30px;
-    .deposit {
-        @extend .test-environment;
+        box-shadow: rgba(0, 0, 0, 0.02) 0px -2px 1px,
+            rgba(0, 0, 0, 0.08) 0px 4px 8px, rgba(0, 0, 0, 0.08) 0px 16px 24px,
+            rgba(0, 0, 0, 0.02) 0px 24px 32px;
+        border-radius: 30px;
+        text-align: center;
 
-        border-radius: 12px;
-        text-align: left;
-        margin-bottom: 10px;
-
-        &.done {
+        &.disabled > input {
             opacity: 0.6;
         }
 
+        > * {
+            margin-bottom: 10px;
+
+            &:last-child {
+                margin-bottom: 0;
+            }
+        }
+    }
+
+    .box {
+        min-height: 60px;
+        border: 1px solid rgb(237, 238, 240);
+        border-radius: 12px;
+        padding: 10px;
+        display: flex;
+        align-items: center;
+
+        p:last-child {
+            margin-bottom: 0;
+        }
+
+        &.testnet-warning {
+            height: 46px;
+            min-height: unset;
+            border-color: $red;
+            color: $red;
+            display: flex;
+            justify-content: center;
+            position: absolute;
+            top: 15px;
+            right: 15px;
+        }
+    }
+
+    .box-action {
+        cursor: pointer;
+        width: 60px;
+
+        &.disabled {
+            opacity: 0.6;
+            cursor: initial;
+        }
+    }
+
+    select {
+        height: 50px;
+        width: 100%;
+        text-align: center;
+    }
+
+    .send {
+        display: flex;
+        flex-flow: row;
+        flex-grow: 2;
+
+        + .send {
+            margin-top: 5px;
+        }
+
+        > .box {
+            border-left: 0;
+        }
+
+        input {
+            flex-grow: 2;
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+        }
+
+        .no-right-border {
+            border-right: 0;
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+        }
+
+        .no-left-border {
+            border-left: 0;
+            border-top-left-radius: 0;
+            border-bottom-left-radius: 0;
+        }
+
+        > .send > .box {
+            height: 46px;
+            border-left: 0;
+            border-radius: 0;
+        }
+
+        svg {
+            width: 22px;
+            height: 22px;
+        }
+    }
+
+    div.tab {
+        font-weight: 100;
+        background: none;
+        width: 50%;
+        display: inline-block;
+        border: 1px solid rgb(237, 238, 240);
+        padding: 10px;
+        border-top-left-radius: 12px;
+
+        &:hover {
+            cursor: pointer;
+        }
+
+        &.disabled {
+            cursor: not-allowed;
+        }
+
+        &.tab--selected {
+            font-weight: 900;
+            border-bottom: none;
+        }
+
+        + .tab {
+            border-top-left-radius: 0px;
+            border-top-right-radius: 12px;
+
+            border-left: 0;
+        }
+    }
+
+    form {
+        padding: 10px;
+    }
+
+    .form-outer {
+        border: 1px solid rgb(237, 238, 240);
+        border-top: none;
+        padding: 5px;
+        margin-bottom: 30px;
+        margin-top: -15px;
+        border-bottom-left-radius: 12px;
+        border-bottom-right-radius: 12px;
+    }
+
+    input {
+        height: 46px;
+        border-radius: 12px;
+        width: 100%;
+        border: 1px solid rgb(237, 238, 240);
+        padding: 0 10px;
+    }
+
+    form {
+        input {
+            height: 60px;
+        }
+    }
+
+    .red {
+        color: $red;
+        border-color: $red;
+    }
+
+    .blue {
+        color: $blue;
+        border-color: $blue;
+    }
+
+    .button {
+        width: 100%;
+        height: 60px;
+        margin: 0 auto;
+        padding: 0 20px;
+        border: none;
+        margin-bottom: 5px;
+        border-radius: 12px;
+        line-height: 250%;
+        border: 1px solid #aaa;
+        font-size: 18px;
+        letter-spacing: 1px;
+
+        &.blue {
+            background: $blue;
+            color: white;
+            border: 1px solid $blue;
+        }
+
+        &:not(.disabled):active {
+            background: $blue;
+            color: white;
+            font-weight: 900;
+        }
+
+        &.light-blue {
+            background: lighten($blue, 45);
+            color: $blue;
+            border: 1px solid lighten($blue, 45);
+
+            &:not(.disabled):active {
+                background: lighten($blue, 45);
+                color: $blue;
+                font-weight: 400;
+                border: none;
+            }
+        }
+
+        padding-top: 3px;
+
+        &:disabled,
+        &.disabled {
+            background: #0070e8aa;
+            // background: #eee;
+            border: 1px solid darken($color: #eee, $amount: 10);
+            cursor: not-allowed;
+        }
+    }
+
+    .deposit-address {
+        @extend .box;
+        display: block;
+        padding: 15px;
+        // padding: 5px;
+
+        text-align: left;
         p {
+            margin: 0;
             overflow-x: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
         }
+    }
 
-        button {
-            background-color: white;
-            border: 1px solid $blue;
-            color: $blue;
+    .deposit-loading {
+        opacity: 0.5;
+        margin-top: 15px;
+        .loading {
+            opacity: 0.3;
+        }
+    }
+
+    .Select--currency__control {
+        border-radius: 12px !important;
+        cursor: pointer;
+    }
+
+    .Select--currency__value-container {
+        height: 44px;
+    }
+
+    .Select--currency__single-value,
+    .Select--currency__input {
+        margin-top: -5px;
+    }
+
+    .deposits {
+        margin-top: 30px;
+        padding-bottom: 30px;
+        .deposit {
+            @extend .test-environment;
+
+            border-radius: 12px;
+            text-align: left;
+            margin-bottom: 10px;
+
+            &.done {
+                opacity: 0.6;
+            }
+
+            p {
+                overflow-x: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+
+            .button {
+                background-color: white;
+                border: 1px solid $blue;
+                color: $blue;
+            }
         }
     }
 }

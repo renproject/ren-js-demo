@@ -1,27 +1,54 @@
-// tslint:disable: no-console react-this-binding-issue
-
 import * as React from "react";
 
 import BigNumber from "bignumber.js";
-import Web3 from "web3";
 import RenJS from "@renproject/ren";
+import { BurnAndRelease } from "@renproject/ren/build/main/burnAndRelease";
+import { Loading } from "@renproject/react-components";
 
-import { Assets } from "./main";
+import { Asset, Assets, Chain } from "../lib/chains";
+import { BurnDetails, DepositDetails } from "./useTransactionStorage";
 
 interface Props {
-    asset: string;
+    asset: Asset;
     renJS: RenJS;
-    web3: Web3 | null;
+    mintChain: Chain;
+    mintChainProvider: any | null;
     network: string;
     balance: string | null;
+    addBurn: (txHash: string, deposit: BurnAndRelease) => void;
+    startBurn: (
+        renJS: RenJS,
+        mintChain: Chain,
+        mintChainProvider: any,
+        asset: Asset,
+        recipientAddress: string,
+        amount: string,
+        fromAddress: string,
+        updateTransaction: (
+            txHash: string,
+            transaction: Partial<BurnDetails | DepositDetails>,
+        ) => void,
+    ) => Promise<BurnAndRelease>;
+    connectMintChain: () => void;
+    getDefaultMintChainAddress: () => Promise<string> | string;
+    updateTransaction: (
+        txHash: string,
+        transaction: Partial<BurnDetails | DepositDetails>,
+    ) => void;
 }
 
 export const BurnForm: React.FC<Props> = ({
     asset,
     renJS,
-    web3,
+    mintChain,
+    mintChainProvider,
     network,
     balance,
+    startBurn,
+    connectMintChain,
+    getDefaultMintChainAddress,
+    addBurn,
+    updateTransaction,
 }) => {
     const isTestnet = network === "testnet" || network === "devnet";
 
@@ -36,10 +63,13 @@ export const BurnForm: React.FC<Props> = ({
         return !recipientAddress || recipientAddress === "";
     }, [recipientAddress]);
 
+    const [submitting, setSubmitting] = React.useState(false);
+
     const onSubmit = React.useCallback(
         async (event: React.FormEvent<HTMLFormElement>) => {
             event.preventDefault();
-            if (!web3) {
+            setSubmitting(true);
+            if (!mintChainProvider) {
                 setErrorMessage("Please use a Web3 browser");
                 return;
             }
@@ -53,7 +83,20 @@ export const BurnForm: React.FC<Props> = ({
             }
             setErrorMessage(null);
             try {
-                // TODO
+                const burn = await startBurn(
+                    renJS,
+                    mintChain,
+                    mintChainProvider,
+                    asset,
+                    recipientAddress,
+                    amount,
+                    await getDefaultMintChainAddress(),
+                    updateTransaction,
+                );
+                const txHash = await burn.txHash();
+                if (burn._burnDetails) {
+                    addBurn(txHash, burn);
+                }
             } catch (error) {
                 console.error(error);
                 setErrorMessage(
@@ -62,8 +105,20 @@ export const BurnForm: React.FC<Props> = ({
                     ),
                 );
             }
+            setSubmitting(false);
         },
-        [amount, web3],
+        [
+            amount,
+            mintChainProvider,
+            asset,
+            mintChain,
+            recipientAddress,
+            renJS,
+            startBurn,
+            updateTransaction,
+            addBurn,
+            getDefaultMintChainAddress,
+        ],
     );
 
     const burnMaximumValue = React.useCallback(() => {
@@ -117,14 +172,23 @@ export const BurnForm: React.FC<Props> = ({
                 </div>
             </div>
             <div className="send">
-                <button
-                    type="submit"
-                    className={`blue ${
-                        !amount || /* !validAddress */ false ? "disabled" : ""
-                    }`}
-                >
-                    Burn
-                </button>
+                {mintChainProvider ? (
+                    <button
+                        type="submit"
+                        disabled={!amount || !recipientAddress || submitting}
+                        className={`button blue`}
+                    >
+                        {submitting ? <Loading alt={true} /> : <>Burn</>}
+                    </button>
+                ) : (
+                    <button
+                        type="button"
+                        className={`button light-blue`}
+                        onClick={connectMintChain}
+                    >
+                        Connect {mintChain} wallet
+                    </button>
+                )}
             </div>
             {errorMessage ? <p className="box red">{errorMessage}</p> : <></>}
         </form>

@@ -2,21 +2,35 @@
 
 import * as React from "react";
 
-import Web3 from "web3";
 import RenJS from "@renproject/ren";
 import { LockAndMintDeposit } from "@renproject/ren/build/main/lockAndMint";
 import CopyToClipboard from "react-copy-to-clipboard";
 import { Loading } from "@renproject/react-components";
 
-import { startMint } from "../lib/mint";
+import { Asset, Chain } from "../lib/chains";
 import { ReactComponent as MetaMaskLogo } from "./styles/metamask.svg";
 
 interface Props {
-    asset: string;
+    asset: Asset;
+    mintChain: Chain;
     renJS: RenJS;
-    web3: Web3 | null;
+    mintChainProvider: any | null | undefined;
     network: string;
+    startMint: (
+        renJS: RenJS,
+        mintChain: Chain,
+        mintChainProvider: any,
+        asset: Asset,
+        recipientAddress: string,
+        showAddress: (
+            address: string | { address: string; params?: string },
+        ) => void,
+        onDeposit: (txHash: string, deposit: LockAndMintDeposit) => void,
+    ) => Promise<void>;
+    connectMintChain: () => void;
     addDeposit: (txHash: string, deposit: LockAndMintDeposit) => void;
+    getDefaultMintChainAddress: () => Promise<string> | string;
+    addressIsValid: (address: string) => boolean;
 }
 
 const ClickToCopy = ({ text }: { text: string }) => {
@@ -42,10 +56,15 @@ const ClickToCopy = ({ text }: { text: string }) => {
 
 export const MintForm: React.FC<Props> = ({
     asset,
+    mintChain,
     renJS,
-    web3,
+    mintChainProvider,
     network,
+    startMint,
+    connectMintChain,
     addDeposit,
+    getDefaultMintChainAddress,
+    addressIsValid,
 }) => {
     const isTestnet = network === "testnet" || network === "devnet";
 
@@ -53,9 +72,9 @@ export const MintForm: React.FC<Props> = ({
         null as string | null,
     );
 
-    const [ethereumAddress, setEthereumAddress] = React.useState<string | null>(
-        null,
-    );
+    const [recipientAddress, setRecipientAddress] = React.useState<
+        string | null
+    >(null);
 
     const [generatingAddress, setGeneratingAddress] = React.useState(false);
     const [depositAddress, setDepositAddress] = React.useState<
@@ -68,22 +87,23 @@ export const MintForm: React.FC<Props> = ({
             setGeneratingAddress(true);
             setDepositAddress(null);
 
-            if (!web3) {
-                setErrorMessage("Please use a Web3 browser");
+            if (!mintChainProvider) {
                 return;
             }
-            if (!ethereumAddress) {
-                setErrorMessage("Please enter a valid Ethereum address.");
+
+            if (!recipientAddress) {
+                setErrorMessage(`Please enter a valid ${mintChain} address.`);
                 return;
             }
             setErrorMessage(null);
             try {
                 await startMint(
-                    web3,
                     renJS,
-                    ethereumAddress,
-                    setDepositAddress,
+                    mintChain,
+                    mintChainProvider,
                     asset,
+                    recipientAddress,
+                    setDepositAddress,
                     addDeposit,
                 );
             } catch (error) {
@@ -96,27 +116,33 @@ export const MintForm: React.FC<Props> = ({
             }
             setGeneratingAddress(false);
         },
-        [asset, renJS, ethereumAddress, web3, addDeposit],
+        [
+            asset,
+            renJS,
+            recipientAddress,
+            mintChainProvider,
+            addDeposit,
+            mintChain,
+            startMint,
+        ],
     );
 
     const useMetaMaskAccount = React.useCallback(async () => {
-        if (!web3) {
+        if (!mintChainProvider) {
             setErrorMessage("Please use a Web3 browser");
             return;
         }
         try {
-            setEthereumAddress((await web3.eth.getAccounts())[0]);
+            setRecipientAddress(await getDefaultMintChainAddress());
         } catch (error) {
             console.error(error);
         }
-    }, [web3, setEthereumAddress]);
+    }, [mintChainProvider, setRecipientAddress, getDefaultMintChainAddress]);
 
-    const addressIsValid: boolean = React.useMemo(() => {
-        return !!(
-            ethereumAddress &&
-            ethereumAddress.match(/(^0x[A-Fa-f0-9]{40}$)|(^.*\.eth$)/)
-        );
-    }, [ethereumAddress]);
+    const validAddress: boolean = React.useMemo(
+        () => (recipientAddress ? addressIsValid(recipientAddress) : false),
+        [recipientAddress, addressIsValid],
+    );
 
     return (
         <form
@@ -126,32 +152,44 @@ export const MintForm: React.FC<Props> = ({
             <div className="send">
                 <input
                     className="no-right-border"
-                    value={ethereumAddress || ""}
+                    value={recipientAddress || ""}
                     onChange={(e) => {
-                        setEthereumAddress(e.target.value);
+                        setRecipientAddress(e.target.value);
                     }}
                     placeholder={`Recipient (${
-                        isTestnet ? "Rinkeby" : "Ethereum"
-                    } address)`}
+                        isTestnet ? "testnet" : ""
+                    } ${mintChain} address)`}
                 />
                 <div
                     role="button"
-                    className="box box-action no-left-border"
-                    onClick={useMetaMaskAccount}
+                    className={`box box-action no-left-border ${
+                        !mintChainProvider ? "disabled" : ""
+                    }`}
+                    onClick={mintChainProvider ? useMetaMaskAccount : undefined}
                 >
                     <MetaMaskLogo />
                 </div>
             </div>
             <div className="send">
-                <button
-                    disabled={generatingAddress || !addressIsValid}
-                    type="submit"
-                    className={`blue ${
-                        generatingAddress || !addressIsValid ? "disabled" : ""
-                    }`}
-                >
-                    {generatingAddress ? <Loading alt={true} /> : <>Mint</>}
-                </button>
+                {mintChainProvider ? (
+                    <button
+                        disabled={generatingAddress || !validAddress}
+                        type="submit"
+                        className={`button blue ${
+                            generatingAddress || !validAddress ? "disabled" : ""
+                        }`}
+                    >
+                        {generatingAddress ? <Loading alt={true} /> : <>Mint</>}
+                    </button>
+                ) : (
+                    <button
+                        type="button"
+                        className={`button light-blue`}
+                        onClick={connectMintChain}
+                    >
+                        Connect {mintChain} wallet
+                    </button>
+                )}
             </div>
             {depositAddress ? (
                 <>

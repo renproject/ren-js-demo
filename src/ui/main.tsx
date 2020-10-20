@@ -3,26 +3,24 @@
 import * as React from "react";
 
 import { Loading, SelectMarket } from "@renproject/react-components";
-import { LockAndMintDeposit } from "@renproject/ren/build/main/lockAndMint";
-import { OrderedMap } from "immutable";
+import { useMultiwallet } from "@renproject/multiwallet-ui";
 
+import {
+    Asset,
+    Assets,
+    Chain,
+    Chains,
+    defaultAsset,
+    defaultMintChain,
+} from "../lib/chains";
 import { Wallet } from "../lib/ethereum";
-import { DepositStatus, stagingRenJS } from "../lib/mint";
+import { stagingRenJS, startBurn, startMint } from "../lib/mint";
 import { BurnForm } from "./burnForm";
+import { BurnObject } from "./burnObject";
+import { ConnectWallet } from "./connectWallet";
 import { DepositObject } from "./depositObject";
 import { MintForm } from "./mintForm";
-
-type Asset = string;
-export const Assets = new Map<Asset, { symbol: Asset; name: string }>()
-    .set("FIL", {
-        symbol: "FIL",
-        name: "Filecoin",
-    })
-    .set("BTC", {
-        symbol: "BTC",
-        name: "Bitcoin",
-    });
-const defaultAsset = "FIL";
+import { useTransactionStorage } from "./useTransactionStorage";
 
 const NETWORK = "testnet";
 
@@ -32,76 +30,66 @@ enum Tab {
 }
 
 export const Main = () => {
+    const { enabledChains } = useMultiwallet();
+
     const [asset, setAsset] = React.useState<Asset>(defaultAsset);
-    const [wallet, setWallet] = React.useState<Wallet | null>(null);
+    const [mintChain, setMintChain] = React.useState<Chain>(defaultMintChain);
 
     const isTestnet = NETWORK === "testnet" || NETWORK === "devnet";
 
-    React.useEffect(() => {
-        (async () => {
-            setWallet(await Wallet.getWallet(isTestnet));
-        })().catch((error) => setErrorMessage(error.message));
-    }, [isTestnet]);
-
     const renJS = React.useMemo(() => stagingRenJS(), []);
 
-    const [errorMessage, setErrorMessage] = React.useState(
-        null as string | null,
-    );
+    const [errorMessage] = React.useState(null as string | null);
 
     const [balance, setBalance] = React.useState<string | null>(null);
 
-    const onMarketChange = React.useCallback(
-        (newAsset) => {
-            setAsset(newAsset);
-        },
-        [setAsset],
-    );
+    const mintChainProvider =
+        enabledChains[mintChain] && enabledChains[mintChain].provider;
 
-    React.useEffect(() => {
-        (async () => {
+    const updateBalance = React.useCallback(
+        (assetIn?: Asset) => {
+            if (assetIn && assetIn !== asset) {
+                return;
+            }
+
             setBalance(null);
-            if (wallet) {
-                Wallet.getBalance(wallet, asset)
+
+            if (mintChainProvider) {
+                Wallet.getBalance(mintChain, mintChainProvider, asset)
                     .then(setBalance)
                     .catch(console.error);
             } else {
                 setBalance("?");
             }
+        },
+        [mintChain, mintChainProvider, asset, setBalance],
+    );
+
+    React.useEffect(() => {
+        (async () => {
+            updateBalance();
         })().catch(console.error);
-    }, [wallet, asset, setBalance]);
+    }, [updateBalance]);
 
     const [tab, setTab] = React.useState<Tab.Mint | Tab.Burn>(Tab.Mint);
 
-    const [deposits, setDeposits] = React.useState(
-        OrderedMap<
-            string,
-            { deposit: LockAndMintDeposit; status: DepositStatus }
-        >(),
-    );
+    const {
+        deposits,
+        addDeposit,
+        addBurn,
+        updateTransaction,
+    } = useTransactionStorage(updateBalance);
 
-    const addDeposit = React.useCallback(
-        (txHash: string, deposit: LockAndMintDeposit) => {
-            setDeposits((deposits) =>
-                deposits.get(txHash)
-                    ? deposits
-                    : deposits.set(txHash, {
-                          deposit: deposit,
-                          status: DepositStatus.DETECTED,
-                      }),
-            );
-        },
-        [setDeposits],
+    // Multiwallet modal
+    const [multiwalletChain, setMultiwalletChain] = React.useState<
+        string | null
+    >(null);
+    const closeMultiwallet = () => setMultiwalletChain(null);
+    const connectMintChain = React.useCallback(
+        () => setMultiwalletChain(mintChain),
+        [mintChain, setMultiwalletChain],
     );
-
-    const updateStatus = React.useCallback(
-        (txHash: string, status: DepositStatus) => {
-            setDeposits((deposits) =>
-                deposits.set(txHash, { ...deposits.get(txHash)!, status }),
-            );
-        },
-        [setDeposits],
-    );
+    // const connectBurnChain = React.useCallback(() => setMultiwalletChain(mintChain), [mintChain, setMultiwalletChain]);
 
     return (
         <>
@@ -114,15 +102,28 @@ export const Main = () => {
                     thisToken={asset}
                     otherToken={""}
                     allTokens={Assets}
-                    key={"top"}
-                    onMarketChange={onMarketChange}
-                    getMarket={() => {
-                        return undefined;
-                    }}
+                    key={"assetSelector"}
+                    onMarketChange={setAsset as (asset: string) => void}
+                    getMarket={() => undefined}
+                />
+                <SelectMarket
+                    top
+                    thisToken={mintChain}
+                    otherToken={""}
+                    allTokens={Chains}
+                    key={"chainSelector"}
+                    onMarketChange={setMintChain as (chain: string) => void}
+                    getMarket={() => undefined}
                 />
                 <div className="box">
-                    Your ren{asset} balance: {balance ? balance : <Loading />}{" "}
-                    ren{asset}
+                    {mintChainProvider ? (
+                        <>
+                            Your ren{asset} balance:{" "}
+                            {balance ? balance : <Loading />} ren{asset}
+                        </>
+                    ) : (
+                        <>Connect to see your balance.</>
+                    )}
                 </div>
 
                 <div>
@@ -135,10 +136,10 @@ export const Main = () => {
                         Mint
                     </div>
                     <div
-                        className={`tab disabled ${
+                        className={`tab ${
                             tab === Tab.Burn ? "tab--selected" : ""
                         }`}
-                        // onClick={() => setTab(Tab.Burn)}
+                        onClick={() => setTab(Tab.Burn)}
                     >
                         Burn
                     </div>
@@ -148,22 +149,40 @@ export const Main = () => {
                     {tab === Tab.Mint ? (
                         <MintForm
                             // Reset state when the asset is changed.
-                            key={asset}
+                            key={asset + mintChain}
                             asset={asset}
-                            web3={wallet}
+                            mintChain={mintChain}
+                            mintChainProvider={mintChainProvider}
                             renJS={renJS}
                             network={NETWORK}
+                            startMint={startMint}
                             addDeposit={addDeposit}
+                            connectMintChain={connectMintChain}
+                            getDefaultMintChainAddress={() =>
+                                enabledChains[mintChain].account as string
+                            }
+                            addressIsValid={() => true}
                         />
                     ) : (
                         <BurnForm
                             // Reset state when the asset is changed.
-                            key={asset}
+                            key={asset + mintChain}
                             asset={asset}
-                            web3={wallet}
+                            mintChain={mintChain}
+                            mintChainProvider={
+                                enabledChains[mintChain] &&
+                                enabledChains[mintChain].provider
+                            }
+                            connectMintChain={connectMintChain}
+                            startBurn={startBurn}
+                            addBurn={addBurn}
                             renJS={renJS}
                             network={NETWORK}
                             balance={balance}
+                            updateTransaction={updateTransaction}
+                            getDefaultMintChainAddress={() =>
+                                enabledChains[mintChain].account as string
+                            }
                         />
                     )}
                 </div>
@@ -175,19 +194,50 @@ export const Main = () => {
                 )}
             </div>
 
+            <div className="connect-wallets">
+                <ConnectWallet
+                    chain={multiwalletChain}
+                    close={closeMultiwallet}
+                />
+            </div>
+
             <div className="deposits">
-                {Array.from(deposits.keys()).map((txHash) => {
-                    const { deposit, status } = deposits.get(txHash)!;
-                    return (
-                        <DepositObject
-                            key={txHash}
-                            txHash={txHash}
-                            deposit={deposit}
-                            status={status}
-                            updateStatus={updateStatus}
-                        />
-                    );
-                })}
+                {Array.from(deposits.keys())
+                    .map((txHash) => {
+                        const depositDetails = deposits.get(txHash)!;
+                        if (depositDetails.type === "BURN") {
+                            const {
+                                burn,
+                                status,
+                                confirmations,
+                                targetConfs,
+                                renVMStatus,
+                            } = depositDetails;
+                            return (
+                                <BurnObject
+                                    key={txHash}
+                                    txHash={txHash}
+                                    burn={burn}
+                                    status={status}
+                                    confirmations={confirmations}
+                                    targetConfs={targetConfs}
+                                    updateTransaction={updateTransaction}
+                                    renVMStatus={renVMStatus}
+                                />
+                            );
+                        }
+                        const { deposit, status } = depositDetails;
+                        return (
+                            <DepositObject
+                                key={txHash}
+                                txHash={txHash}
+                                deposit={deposit}
+                                status={status}
+                                updateTransaction={updateTransaction}
+                            />
+                        );
+                    })
+                    .reverse()}
             </div>
         </>
     );
