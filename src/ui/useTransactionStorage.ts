@@ -23,10 +23,10 @@ export interface BurnDetails {
 }
 
 export const useTransactionStorage = (
-    updateBalance: (asset: Asset) => void,
+    updateBalance: (asset: Asset) => void
 ) => {
     const [deposits, setDeposits] = React.useState(
-        OrderedMap<string, DepositDetails | BurnDetails>(),
+        OrderedMap<string, DepositDetails | BurnDetails>()
     );
 
     const addDeposit = React.useCallback(
@@ -38,10 +38,10 @@ export const useTransactionStorage = (
                           type: "MINT",
                           deposit: deposit,
                           status: DepositStatus.DETECTED,
-                      }),
+                      })
             );
         },
-        [setDeposits],
+        [setDeposits]
     );
 
     const addBurn = React.useCallback(
@@ -55,11 +55,11 @@ export const useTransactionStorage = (
                           status: BurnStatus.BURNT,
                           confirmations: 0,
                           targetConfs: undefined,
-                          renVMStatus: undefined
-                      }),
+                          renVMStatus: undefined,
+                      })
             );
         },
-        [setDeposits],
+        [setDeposits]
     );
 
     const updateTransaction = React.useCallback(
@@ -72,7 +72,7 @@ export const useTransactionStorage = (
                 if (currentDeposit.type === "MINT") {
                     if (newDetails.status === DepositStatus.DONE) {
                         updateBalance(
-                            currentDeposit.deposit._params.asset as Asset,
+                            currentDeposit.deposit.params.asset as Asset
                         );
                     }
                     return deposits.set(txHash, {
@@ -82,7 +82,7 @@ export const useTransactionStorage = (
                 } else {
                     if (newDetails.status === BurnStatus.BURNT) {
                         updateBalance(
-                            currentDeposit.burn._params.asset as Asset,
+                            currentDeposit.burn.params.asset as Asset
                         );
                     }
                     return deposits.set(txHash, {
@@ -92,7 +92,7 @@ export const useTransactionStorage = (
                 }
             });
         },
-        [setDeposits, updateBalance],
+        [setDeposits, updateBalance]
     );
 
     return { deposits, addDeposit, addBurn, updateTransaction };

@@ -50,27 +50,27 @@ declare global {
 const getBalance = async (
     mintChain: Chain,
     mintChainProvider: any,
-    token: string,
+    token: string
 ): Promise<string> => {
     const web3 = new Web3(mintChainProvider);
     const web3Address = (await web3.eth.getAccounts())[0];
     const tokenAddress = await (getMintChainObject(
         mintChain,
-        mintChainProvider,
+        mintChainProvider
     ) as Ethereum)
-        .initialize(RenNetwork.Testnet)
+        .initialize(RenNetwork.MainnetVDot3)
         .getTokenContractAddress(token);
     const tokenContract = new web3.eth.Contract(
         ERC20ABI as AbiItem[],
-        tokenAddress,
+        tokenAddress
     );
     const decimals = await tokenContract.methods.decimals().call();
     const balance = await tokenContract.methods.balanceOf(web3Address).call();
     const amount = new BigNumber(balance)
         .div(
             new BigNumber(10).exponentiatedBy(
-                new BigNumber(decimals).toNumber(),
-            ),
+                new BigNumber(decimals).toNumber()
+            )
         )
         .toFixed(4);
     return amount;

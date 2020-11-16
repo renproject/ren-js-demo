@@ -25,7 +25,7 @@ interface Props {
     renVMStatus: TxStatus | undefined;
     updateTransaction: (
         txHash: string,
-        transaction: Partial<BurnDetails> | Partial<DepositDetails>,
+        transaction: Partial<BurnDetails> | Partial<DepositDetails>
     ) => void;
 }
 
@@ -39,8 +39,8 @@ export const BurnObject: React.FC<Props> = ({
     updateTransaction,
 }) => {
     const {
-        _params: { asset, from },
-        _burnDetails,
+        params: { asset, from },
+        burnDetails,
     } = burn;
 
     const [errorMessage] = React.useState<string | null>(null);
@@ -50,20 +50,20 @@ export const BurnObject: React.FC<Props> = ({
     ]);
 
     const [amountReadable, setAmountReadable] = React.useState<string | null>(
-        null,
+        null
     );
 
     React.useEffect(() => {
         (async () => {
             const newValue: string | null =
-                (burn._burnDetails &&
-                    new BigNumber(burn._burnDetails.amount)
+                (burn.burnDetails &&
+                    new BigNumber(burn.burnDetails.amount)
                         .div(
                             new BigNumber(10).exponentiatedBy(
-                                await burn._params.to.assetDecimals(
-                                    burn._params.asset,
-                                ),
-                            ),
+                                await burn.params.to.assetDecimals(
+                                    burn.params.asset
+                                )
+                            )
                         )
                         .toFixed()) ||
                 null;
@@ -83,8 +83,8 @@ export const BurnObject: React.FC<Props> = ({
                     )}{" "}
                     {asset}
                 </b>
-                {_burnDetails && _burnDetails.to ? (
-                    <> to {_burnDetails.to}</>
+                {burnDetails && burnDetails.to ? (
+                    <> to {burnDetails.to}</>
                 ) : null}
             </p>
             <p>
@@ -116,19 +116,19 @@ export const BurnObject: React.FC<Props> = ({
                 </p>
             ) : null}
 
-            {_burnDetails && _burnDetails.transaction ? (
+            {burnDetails && burnDetails.transaction ? (
                 <p>
                     <b>{from.name} tx:</b>{" "}
                     {from.transactionExplorerLink ? (
                         <ExternalLink
                             href={from.transactionExplorerLink(
-                                _burnDetails.transaction,
+                                burnDetails.transaction
                             )}
                         >
-                            {from.transactionID(_burnDetails.transaction)}
+                            {from.transactionID(burnDetails.transaction)}
                         </ExternalLink>
                     ) : (
-                        _burnDetails.transaction
+                        burnDetails.transaction
                     )}
                 </p>
             ) : null}

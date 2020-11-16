@@ -7,7 +7,7 @@ import { RenNetwork } from "@renproject/interfaces";
 import { Chain } from "./chains";
 import { Icons } from "./icons";
 
-export const ethNetworkToRenNetwork = (id: number): RenNetwork => {
+export const ethNetworkToRenNetwork = (id: number): string => {
     return {
         1: RenNetwork.Mainnet,
         "0x01": RenNetwork.Mainnet,
@@ -18,7 +18,7 @@ export const ethNetworkToRenNetwork = (id: number): RenNetwork => {
     }[id];
 };
 
-export const bscNetworkToRenNetwork = (id: number): RenNetwork => {
+export const bscNetworkToRenNetwork = (id: number): string => {
     return {
         56: RenNetwork.Mainnet,
         "0x38": RenNetwork.Mainnet,
@@ -35,7 +35,7 @@ export const multiwalletOptions: WalletPickerConfig<any, any> = {
                 logo: Icons.Metamask,
                 connector: new EthereumInjectedConnector({
                     debug: true,
-                    networkIdMapper: ethNetworkToRenNetwork,
+                    networkIdMapper: ethNetworkToRenNetwork as any,
                 } as any),
             },
             {
@@ -59,7 +59,7 @@ export const multiwalletOptions: WalletPickerConfig<any, any> = {
                 logo: Icons.BSC,
                 connector: new BinanceSmartChainInjectedConnector({
                     debug: true,
-                    networkIdMapper: bscNetworkToRenNetwork,
+                    networkIdMapper: bscNetworkToRenNetwork as any,
                 }),
             },
         ],

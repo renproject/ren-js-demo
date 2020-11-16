@@ -22,7 +22,7 @@ interface Props {
     status: DepositStatus;
     updateTransaction: (
         txHash: string,
-        transaction: Partial<BurnDetails> | Partial<DepositDetails>,
+        transaction: Partial<BurnDetails> | Partial<DepositDetails>
     ) => void;
 }
 
@@ -32,7 +32,7 @@ export const DepositObject: React.FC<Props> = ({
     status,
     updateTransaction,
 }) => {
-    const { asset, from, to } = deposit._params;
+    const { asset, from, to } = deposit.params;
     const { amount } = deposit.depositDetails;
 
     const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
@@ -42,19 +42,19 @@ export const DepositObject: React.FC<Props> = ({
     ]);
 
     const [amountReadable, setAmountReadable] = React.useState<string | null>(
-        null,
+        null
     );
 
     const onStatus = React.useCallback(
         (newStatus: DepositStatus) => {
             updateTransaction(txHash, { status: newStatus });
         },
-        [updateTransaction, txHash],
+        [updateTransaction, txHash]
     );
 
     // Confirmations
     const [confirmations, setConfirmations] = React.useState<number | null>(
-        null,
+        null
     );
     const [targetConfirmations, setTargetConfirmations] = React.useState<
         number | null
@@ -64,14 +64,14 @@ export const DepositObject: React.FC<Props> = ({
             setConfirmations(confs);
             setTargetConfirmations(target);
         },
-        [],
+        []
     );
 
     // The RenVM Status - see the TxStatus type.
     const [renVMStatus, setRenVMStatus] = React.useState<TxStatus | null>(null);
 
     const [mintTransaction, setMintTransaction] = React.useState<string | null>(
-        null,
+        null
     );
 
     const step1 = React.useCallback(() => {
@@ -81,7 +81,7 @@ export const DepositObject: React.FC<Props> = ({
             onStatus,
             onConfirmation,
             setRenVMStatus,
-            setMintTransaction,
+            setMintTransaction
         ).catch((error) => {
             setErrorMessage(String(error.message || error));
             onStatus(DepositStatus.ERROR);
@@ -103,7 +103,7 @@ export const DepositObject: React.FC<Props> = ({
             setAmountReadable(
                 new BigNumber(amount)
                     .div(new BigNumber(10).exponentiatedBy(decimals))
-                    .toFixed(),
+                    .toFixed()
             );
         })().catch(console.error);
     }, []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -156,11 +156,11 @@ export const DepositObject: React.FC<Props> = ({
                     {from.transactionExplorerLink ? (
                         <ExternalLink
                             href={from.transactionExplorerLink(
-                                deposit.depositDetails.transaction,
+                                deposit.depositDetails.transaction
                             )}
                         >
                             {from.transactionID(
-                                deposit.depositDetails.transaction,
+                                deposit.depositDetails.transaction
                             )}
                         </ExternalLink>
                     ) : (

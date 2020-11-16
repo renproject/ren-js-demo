@@ -15,16 +15,31 @@ export const Chains = new Map<Chain, { symbol: Chain; name: string }>()
 export const defaultMintChain = Chain.Ethereum;
 
 export enum Asset {
-    FIL = "FIL",
     BTC = "BTC",
+    ZEC = "ZEC",
+    BCH = "BCH",
+    FIL = "FIL",
+    // DOGE = "DOGE",
 }
 export const Assets = new Map<Asset, { symbol: Asset; name: string }>()
-    .set(Asset.FIL, {
-        symbol: Asset.FIL,
-        name: "Filecoin",
-    })
     .set(Asset.BTC, {
         symbol: Asset.BTC,
         name: "Bitcoin",
+    })
+    .set(Asset.ZEC, {
+        symbol: Asset.ZEC,
+        name: "Zcash",
+    })
+    .set(Asset.BCH, {
+        symbol: Asset.BCH,
+        name: "BitcoinCash",
+    })
+    .set(Asset.FIL, {
+        symbol: Asset.FIL,
+        name: "Filecoin",
     });
+// .set(Asset.DOGE, {
+//     symbol: Asset.DOGE,
+//     name: "Dogecoin",
+// })
 export const defaultAsset = Asset.FIL;

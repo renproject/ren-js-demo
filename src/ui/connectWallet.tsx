@@ -10,14 +10,13 @@ interface Props {
 }
 
 export const ConnectWallet: React.FC<Props> = ({ chain, close }) => {
-    console.log("close", close);
     return (
         <WalletPickerModal
             open={chain !== null}
             options={{
-                targetNetwork: RenNetwork.Testnet,
+                targetNetwork: RenNetwork.Mainnet,
                 chain: chain || "",
-                close,
+                onClose: close,
                 config: multiwalletOptions,
             }}
         />

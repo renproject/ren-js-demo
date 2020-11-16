@@ -26,14 +26,14 @@ interface Props {
         fromAddress: string,
         updateTransaction: (
             txHash: string,
-            transaction: Partial<BurnDetails | DepositDetails>,
-        ) => void,
+            transaction: Partial<BurnDetails | DepositDetails>
+        ) => void
     ) => Promise<BurnAndRelease>;
     connectMintChain: () => void;
     getDefaultMintChainAddress: () => Promise<string> | string;
     updateTransaction: (
         txHash: string,
-        transaction: Partial<BurnDetails | DepositDetails>,
+        transaction: Partial<BurnDetails | DepositDetails>
     ) => void;
 }
 
@@ -53,7 +53,7 @@ export const BurnForm: React.FC<Props> = ({
     const isTestnet = network === "testnet" || network === "devnet";
 
     const [errorMessage, setErrorMessage] = React.useState(
-        null as string | null,
+        null as string | null
     );
 
     const [recipientAddress, setRecipientAddress] = React.useState("");
@@ -91,18 +91,18 @@ export const BurnForm: React.FC<Props> = ({
                     recipientAddress,
                     amount,
                     await getDefaultMintChainAddress(),
-                    updateTransaction,
+                    updateTransaction
                 );
                 const txHash = await burn.txHash();
-                if (burn._burnDetails) {
+                if (burn.burnDetails) {
                     addBurn(txHash, burn);
                 }
             } catch (error) {
                 console.error(error);
                 setErrorMessage(
                     String(
-                        error.message || error.error || JSON.stringify(error),
-                    ),
+                        error.message || error.error || JSON.stringify(error)
+                    )
                 );
             }
             setSubmitting(false);
@@ -118,7 +118,7 @@ export const BurnForm: React.FC<Props> = ({
             updateTransaction,
             addBurn,
             getDefaultMintChainAddress,
-        ],
+        ]
     );
 
     const burnMaximumValue = React.useCallback(() => {

@@ -4,6 +4,8 @@ import * as React from "react";
 
 import { Loading, SelectMarket } from "@renproject/react-components";
 import { useMultiwallet } from "@renproject/multiwallet-ui";
+import RenJS from "@renproject/ren";
+import { RenNetwork } from "@renproject/interfaces";
 
 import {
     Asset,
@@ -14,7 +16,7 @@ import {
     defaultMintChain,
 } from "../lib/chains";
 import { Wallet } from "../lib/ethereum";
-import { stagingRenJS, startBurn, startMint } from "../lib/mint";
+import { logLevel, startBurn, startMint } from "../lib/mint";
 import { BurnForm } from "./burnForm";
 import { BurnObject } from "./burnObject";
 import { ConnectWallet } from "./connectWallet";
@@ -22,7 +24,7 @@ import { DepositObject } from "./depositObject";
 import { MintForm } from "./mintForm";
 import { useTransactionStorage } from "./useTransactionStorage";
 
-const NETWORK = "testnet";
+const NETWORK: string = "mainnet";
 
 enum Tab {
     Mint = "Mint",
@@ -37,7 +39,10 @@ export const Main = () => {
 
     const isTestnet = NETWORK === "testnet" || NETWORK === "devnet";
 
-    const renJS = React.useMemo(() => stagingRenJS(), []);
+    const renJS = React.useMemo(
+        () => new RenJS(RenNetwork.MainnetVDot3, { logLevel }),
+        []
+    );
 
     const [errorMessage] = React.useState(null as string | null);
 
@@ -62,7 +67,7 @@ export const Main = () => {
                 setBalance("?");
             }
         },
-        [mintChain, mintChainProvider, asset, setBalance],
+        [mintChain, mintChainProvider, asset, setBalance]
     );
 
     React.useEffect(() => {
@@ -87,7 +92,7 @@ export const Main = () => {
     const closeMultiwallet = () => setMultiwalletChain(null);
     const connectMintChain = React.useCallback(
         () => setMultiwalletChain(mintChain),
-        [mintChain, setMultiwalletChain],
+        [mintChain, setMultiwalletChain]
     );
     // const connectBurnChain = React.useCallback(() => setMultiwalletChain(mintChain), [mintChain, setMultiwalletChain]);
 

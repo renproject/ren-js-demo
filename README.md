@@ -20,17 +20,16 @@ yarn start
 
 ```ts
 import { Bitcoin, Ethereum } from "@renproject/chains";
-import { renRinkeby } from "@renproject/networks";
 import RenJS from "@renproject/ren";
 import Web3 from "web3";
 
 export const main = async (web3: Web3) => {
-    const renJS = new RenJS("testnet", { logLevel: "log" });
+    const renJS = new RenJS("mainnet", { logLevel: "log" });
 
     const lockAndMint = await renJS.lockAndMint({
         asset: "BTC",
         from: Bitcoin(),
-        to: Ethereum(web3.currentProvider, undefined, renRinkeby).Account({
+        to: Ethereum(web3.currentProvider).Account({
             address: "0x1234...",
         }),
 
@@ -38,21 +37,21 @@ export const main = async (web3: Web3) => {
     });
 
     console.log(
-        `Deposit ${lockAndMint._params.asset} to ${lockAndMint.gatewayAddress}.`,
+        `Deposit ${lockAndMint.params.asset} to ${lockAndMint.gatewayAddress}.`
     );
 
     lockAndMint.on("deposit", async (deposit) => {
         await deposit
             .confirmed()
             .on("confirmation", (confs, target) =>
-                console.log(`Confirmations: ${confs}/${target}`),
+                console.log(`Confirmations: ${confs}/${target}`)
             );
 
         await deposit.signed();
         await deposit
             .mint()
             .on("transactionHash", (txHash) =>
-                console.log(`TxHash: ${txHash}`),
+                console.log(`TxHash: ${txHash}`)
             );
     });
 };
