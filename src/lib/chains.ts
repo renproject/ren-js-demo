@@ -1,3 +1,5 @@
+import { NETWORK } from "../network";
+
 export enum Chain {
     Ethereum = "Ethereum",
     BSC = "BSC",
@@ -19,9 +21,10 @@ export enum Asset {
     ZEC = "ZEC",
     BCH = "BCH",
     FIL = "FIL",
-    // DOGE = "DOGE",
+    LUNA = "LUNA",
+    DOGE = "DOGE",
 }
-export const Assets = new Map<Asset, { symbol: Asset; name: string }>()
+export let Assets = new Map<Asset, { symbol: Asset; name: string }>()
     .set(Asset.BTC, {
         symbol: Asset.BTC,
         name: "Bitcoin",
@@ -37,9 +40,17 @@ export const Assets = new Map<Asset, { symbol: Asset; name: string }>()
     .set(Asset.FIL, {
         symbol: Asset.FIL,
         name: "Filecoin",
+    })
+    .set(Asset.LUNA, {
+        symbol: Asset.LUNA,
+        name: "Luna",
     });
-// .set(Asset.DOGE, {
-//     symbol: Asset.DOGE,
-//     name: "Dogecoin",
-// })
+
+if (NETWORK.isTestnet) {
+    Assets = Assets.set(Asset.DOGE, {
+        symbol: Asset.DOGE,
+        name: "Dogecoin",
+    });
+}
+
 export const defaultAsset = Asset.FIL;

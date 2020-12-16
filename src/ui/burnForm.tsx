@@ -6,6 +6,7 @@ import { BurnAndRelease } from "@renproject/ren/build/main/burnAndRelease";
 import { Loading } from "@renproject/react-components";
 
 import { Asset, Assets, Chain } from "../lib/chains";
+import { NETWORK } from "../network";
 import { BurnDetails, DepositDetails } from "./useTransactionStorage";
 
 interface Props {
@@ -13,7 +14,6 @@ interface Props {
     renJS: RenJS;
     mintChain: Chain;
     mintChainProvider: any | null;
-    network: string;
     balance: string | null;
     addBurn: (txHash: string, deposit: BurnAndRelease) => void;
     startBurn: (
@@ -42,7 +42,6 @@ export const BurnForm: React.FC<Props> = ({
     renJS,
     mintChain,
     mintChainProvider,
-    network,
     balance,
     startBurn,
     connectMintChain,
@@ -50,18 +49,12 @@ export const BurnForm: React.FC<Props> = ({
     addBurn,
     updateTransaction,
 }) => {
-    const isTestnet = network === "testnet" || network === "devnet";
-
     const [errorMessage, setErrorMessage] = React.useState(
         null as string | null
     );
 
     const [recipientAddress, setRecipientAddress] = React.useState("");
     const [amount, setAmount] = React.useState("");
-
-    const isPending = React.useMemo(() => {
-        return !recipientAddress || recipientAddress === "";
-    }, [recipientAddress]);
 
     const [submitting, setSubmitting] = React.useState(false);
 
@@ -136,7 +129,9 @@ export const BurnForm: React.FC<Props> = ({
                     onChange={(e) => {
                         setRecipientAddress(e.target.value);
                     }}
-                    placeholder={`Recipient (${isTestnet ? "Testnet" : ""} ${
+                    placeholder={`Recipient (${
+                        NETWORK.isTestnet ? "Testnet" : ""
+                    } ${
                         (
                             Assets.get(asset) || {
                                 name: asset.toUpperCase(),
@@ -155,19 +150,16 @@ export const BurnForm: React.FC<Props> = ({
                         }}
                         placeholder="Amount"
                     />
-                    {!isPending ? (
-                        <div
-                            role="button"
-                            className={`box box-action box-blue ${
-                                !balance ? "disabled" : ""
-                            }`}
-                            onClick={balance ? burnMaximumValue : undefined}
-                        >
-                            max
-                        </div>
-                    ) : (
-                        <></>
-                    )}
+                    <div
+                        role="button"
+                        className={`box box-action box-blue ${
+                            !balance ? "disabled" : ""
+                        }`}
+                        onClick={balance ? burnMaximumValue : undefined}
+                    >
+                        max
+                    </div>
+
                     <div className="box">{asset.toUpperCase()}</div>
                 </div>
             </div>

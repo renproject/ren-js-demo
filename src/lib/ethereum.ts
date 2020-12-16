@@ -15,6 +15,7 @@ import BigNumber from "bignumber.js";
 import { HttpProvider } from "web3-providers";
 
 import ERC20ABI from "../lib/ABIs/erc20ABI.json";
+import { NETWORK } from "../network";
 import { Chain } from "./chains";
 import { getMintChainObject } from "./mint";
 
@@ -32,33 +33,30 @@ declare global {
     }
 }
 
-// const getWallet = async (isTestnet: boolean): Promise<Wallet> => {
-//     if (window.ethereum && window.web3) {
-//         await window.ethereum.enable();
-//         const wallet = new Web3(window.web3.currentProvider);
-//         const networkID = await wallet.eth.net.getId();
-//         if (isTestnet && networkID !== 4) {
-//             throw new Error("Please change your Web3 wallet to Rinkeby");
-//         } else if (!isTestnet && networkID !== 1) {
-//             throw new Error("Please change your Web3 wallet to Mainnet");
-//         }
-//         return wallet;
-//     }
-//     throw new Error("Please use a Web3 browser.");
-// };
-
 const getBalance = async (
     mintChain: Chain,
     mintChainProvider: any,
     token: string
 ): Promise<string> => {
+    const legacy =
+        (token === "BTC" || token === "ZEC" || token === "BCH") &&
+        mintChain === Chain.Ethereum;
+
     const web3 = new Web3(mintChainProvider);
     const web3Address = (await web3.eth.getAccounts())[0];
     const tokenAddress = await (getMintChainObject(
         mintChain,
         mintChainProvider
     ) as Ethereum)
-        .initialize(RenNetwork.MainnetVDot3)
+        .initialize(
+            NETWORK.isTestnet
+                ? legacy
+                    ? RenNetwork.Testnet
+                    : RenNetwork.TestnetVDot3
+                : legacy
+                ? RenNetwork.Mainnet
+                : RenNetwork.MainnetVDot3
+        )
         .getTokenContractAddress(token);
     const tokenContract = new web3.eth.Contract(
         ERC20ABI as AbiItem[],
@@ -72,7 +70,7 @@ const getBalance = async (
                 new BigNumber(decimals).toNumber()
             )
         )
-        .toFixed(4);
+        .toFixed(4, BigNumber.ROUND_DOWN);
     return amount;
 };
 

@@ -8,9 +8,9 @@ import { TxStatus } from "@renproject/interfaces";
 import { DepositStatus, handleDeposit, submitDeposit } from "../lib/mint";
 import { BurnDetails, DepositDetails } from "./useTransactionStorage";
 
-export const ExternalLink: React.FC<React.AnchorHTMLAttributes<
-    HTMLAnchorElement
->> = ({ children, ...props }) => (
+export const ExternalLink: React.FC<
+    React.AnchorHTMLAttributes<HTMLAnchorElement>
+> = ({ children, ...props }) => (
     <a {...props} target="_blank" rel="noopener noreferrer">
         {children}
     </a>
@@ -153,9 +153,9 @@ export const DepositObject: React.FC<Props> = ({
             {deposit.depositDetails.transaction ? (
                 <p>
                     <b>{from.name} tx:</b>{" "}
-                    {from.transactionExplorerLink ? (
+                    {(from as any).utils.transactionExplorerLink ? (
                         <ExternalLink
-                            href={from.transactionExplorerLink(
+                            href={(from as any).utils.transactionExplorerLink(
                                 deposit.depositDetails.transaction
                             )}
                         >
@@ -163,22 +163,29 @@ export const DepositObject: React.FC<Props> = ({
                                 deposit.depositDetails.transaction
                             )}
                         </ExternalLink>
-                    ) : (
+                    ) : typeof deposit.depositDetails.transaction ===
+                      "string" ? (
                         deposit.depositDetails.transaction
+                    ) : (
+                        JSON.stringify(deposit.depositDetails.transaction)
                     )}
                 </p>
             ) : null}
             {mintTransaction ? (
                 <p>
                     <b>{to.name} tx:</b>{" "}
-                    {to.transactionExplorerLink ? (
+                    {(to as any).utils.transactionExplorerLink ? (
                         <ExternalLink
-                            href={to.transactionExplorerLink(mintTransaction)}
+                            href={(to as any).utils.transactionExplorerLink(
+                                mintTransaction
+                            )}
                         >
                             {mintTransaction}
                         </ExternalLink>
-                    ) : (
+                    ) : typeof mintTransaction === "string" ? (
                         mintTransaction
+                    ) : (
+                        JSON.stringify(mintTransaction)
                     )}
                 </p>
             ) : null}

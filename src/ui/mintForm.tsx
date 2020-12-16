@@ -8,6 +8,7 @@ import CopyToClipboard from "react-copy-to-clipboard";
 import { Loading } from "@renproject/react-components";
 
 import { Asset, Chain } from "../lib/chains";
+import { NETWORK } from "../network";
 import { ReactComponent as MetaMaskLogo } from "./styles/metamask.svg";
 
 interface Props {
@@ -15,7 +16,6 @@ interface Props {
     mintChain: Chain;
     renJS: RenJS;
     mintChainProvider: any | null | undefined;
-    network: string;
     startMint: (
         renJS: RenJS,
         mintChain: Chain,
@@ -23,9 +23,10 @@ interface Props {
         asset: Asset,
         recipientAddress: string,
         showAddress: (
-            address: string | { address: string; params?: string },
+            address: string | { address: string; params?: string }
         ) => void,
-        onDeposit: (txHash: string, deposit: LockAndMintDeposit) => void,
+        setMinimumAmount: (amount: string) => void,
+        onDeposit: (txHash: string, deposit: LockAndMintDeposit) => void
     ) => Promise<void>;
     connectMintChain: () => void;
     addDeposit: (txHash: string, deposit: LockAndMintDeposit) => void;
@@ -59,17 +60,14 @@ export const MintForm: React.FC<Props> = ({
     mintChain,
     renJS,
     mintChainProvider,
-    network,
     startMint,
     connectMintChain,
     addDeposit,
     getDefaultMintChainAddress,
     addressIsValid,
 }) => {
-    const isTestnet = network === "testnet" || network === "devnet";
-
     const [errorMessage, setErrorMessage] = React.useState(
-        null as string | null,
+        null as string | null
     );
 
     const [recipientAddress, setRecipientAddress] = React.useState<
@@ -78,8 +76,12 @@ export const MintForm: React.FC<Props> = ({
 
     const [generatingAddress, setGeneratingAddress] = React.useState(false);
     const [depositAddress, setDepositAddress] = React.useState<
-        string | { address: string; params?: string } | null
+        string | { address: string; params?: string; memo?: string } | null
     >(null);
+
+    const [minimumAmount, setMinimumAmount] = React.useState<string | null>(
+        null
+    );
 
     const onSubmit = React.useCallback(
         async (event: React.FormEvent<HTMLFormElement>) => {
@@ -104,14 +106,15 @@ export const MintForm: React.FC<Props> = ({
                     asset,
                     recipientAddress,
                     setDepositAddress,
-                    addDeposit,
+                    setMinimumAmount,
+                    addDeposit
                 );
             } catch (error) {
                 console.error(error);
                 setErrorMessage(
                     String(
-                        error.message || error.error || JSON.stringify(error),
-                    ),
+                        error.message || error.error || JSON.stringify(error)
+                    )
                 );
             }
             setGeneratingAddress(false);
@@ -124,7 +127,7 @@ export const MintForm: React.FC<Props> = ({
             addDeposit,
             mintChain,
             startMint,
-        ],
+        ]
     );
 
     const useMetaMaskAccount = React.useCallback(async () => {
@@ -141,7 +144,7 @@ export const MintForm: React.FC<Props> = ({
 
     const validAddress: boolean = React.useMemo(
         () => (recipientAddress ? addressIsValid(recipientAddress) : false),
-        [recipientAddress, addressIsValid],
+        [recipientAddress, addressIsValid]
     );
 
     return (
@@ -157,7 +160,7 @@ export const MintForm: React.FC<Props> = ({
                         setRecipientAddress(e.target.value);
                     }}
                     placeholder={`Recipient (${
-                        isTestnet ? "testnet" : ""
+                        NETWORK.isTestnet ? "testnet" : ""
                     } ${mintChain} address)`}
                 />
                 <div
@@ -194,7 +197,9 @@ export const MintForm: React.FC<Props> = ({
             {depositAddress ? (
                 <>
                     <div className="deposit-address">
-                        Deposit <b>{asset}</b> to
+                        Deposit{" "}
+                        {minimumAmount ? <>at least {minimumAmount}</> : null}{" "}
+                        <b>{asset}</b> to
                         {typeof depositAddress === "string" ? (
                             <p>
                                 <b>Address:</b>{" "}
@@ -222,8 +227,18 @@ export const MintForm: React.FC<Props> = ({
                                             <ClickToCopy
                                                 text={Buffer.from(
                                                     depositAddress.params,
-                                                    "base64",
+                                                    "base64"
                                                 ).toString("hex")}
+                                            />
+                                        </p>
+                                    </div>
+                                ) : null}
+                                {depositAddress.memo ? (
+                                    <div>
+                                        <b>Params:</b>
+                                        <p>
+                                            <ClickToCopy
+                                                text={depositAddress.memo}
                                             />
                                         </p>
                                     </div>

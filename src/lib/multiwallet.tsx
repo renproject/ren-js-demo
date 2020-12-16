@@ -10,21 +10,16 @@ import { Icons } from "./icons";
 export const ethNetworkToRenNetwork = (id: number): string => {
     return {
         1: RenNetwork.Mainnet,
-        "0x01": RenNetwork.Mainnet,
-        // 42: RenNetwork.Testnet,
-        // "0x2a": RenNetwork.Testnet,
         4: RenNetwork.Testnet,
-        "0x04": RenNetwork.Testnet,
-    }[id];
+        42: RenNetwork.Testnet,
+    }[parseInt(String(id))];
 };
 
 export const bscNetworkToRenNetwork = (id: number): string => {
     return {
         56: RenNetwork.Mainnet,
-        "0x38": RenNetwork.Mainnet,
         97: RenNetwork.Testnet,
-        "0x61": RenNetwork.Testnet,
-    }[id];
+    }[parseInt(String(id))];
 };
 
 export const multiwalletOptions: WalletPickerConfig<any, any> = {

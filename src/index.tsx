@@ -14,7 +14,7 @@ const render = (Main: () => JSX.Element) => {
         <MultiwalletProvider>
             <div className="main">{<Main />}</div>
         </MultiwalletProvider>,
-        document.getElementById("root") as HTMLElement,
+        document.getElementById("root") as HTMLElement
     );
 };
 

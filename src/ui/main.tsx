@@ -17,14 +17,13 @@ import {
 } from "../lib/chains";
 import { Wallet } from "../lib/ethereum";
 import { logLevel, startBurn, startMint } from "../lib/mint";
+import { NETWORK } from "../network";
 import { BurnForm } from "./burnForm";
 import { BurnObject } from "./burnObject";
 import { ConnectWallet } from "./connectWallet";
 import { DepositObject } from "./depositObject";
 import { MintForm } from "./mintForm";
 import { useTransactionStorage } from "./useTransactionStorage";
-
-const NETWORK: string = "mainnet";
 
 enum Tab {
     Mint = "Mint",
@@ -37,10 +36,12 @@ export const Main = () => {
     const [asset, setAsset] = React.useState<Asset>(defaultAsset);
     const [mintChain, setMintChain] = React.useState<Chain>(defaultMintChain);
 
-    const isTestnet = NETWORK === "testnet" || NETWORK === "devnet";
-
     const renJS = React.useMemo(
-        () => new RenJS(RenNetwork.MainnetVDot3, { logLevel }),
+        () =>
+            new RenJS(
+                NETWORK.isTestnet ? RenNetwork.Testnet : RenNetwork.Mainnet,
+                { logLevel }
+            ),
         []
     );
 
@@ -98,7 +99,7 @@ export const Main = () => {
 
     return (
         <>
-            {isTestnet ? (
+            {NETWORK.isTestnet ? (
                 <div className="box testnet-warning">TESTNET</div>
             ) : null}
             <div className="test-environment">
@@ -159,7 +160,6 @@ export const Main = () => {
                             mintChain={mintChain}
                             mintChainProvider={mintChainProvider}
                             renJS={renJS}
-                            network={NETWORK}
                             startMint={startMint}
                             addDeposit={addDeposit}
                             connectMintChain={connectMintChain}
@@ -182,7 +182,6 @@ export const Main = () => {
                             startBurn={startBurn}
                             addBurn={addBurn}
                             renJS={renJS}
-                            network={NETWORK}
                             balance={balance}
                             updateTransaction={updateTransaction}
                             getDefaultMintChainAddress={() =>

@@ -8,9 +8,9 @@ import { TxStatus } from "@renproject/interfaces";
 import { BurnStatus } from "../lib/mint";
 import { BurnDetails, DepositDetails } from "./useTransactionStorage";
 
-export const ExternalLink: React.FC<React.AnchorHTMLAttributes<
-    HTMLAnchorElement
->> = ({ children, ...props }) => (
+export const ExternalLink: React.FC<
+    React.AnchorHTMLAttributes<HTMLAnchorElement>
+> = ({ children, ...props }) => (
     <a {...props} target="_blank" rel="noopener noreferrer">
         {children}
     </a>
@@ -119,9 +119,9 @@ export const BurnObject: React.FC<Props> = ({
             {burnDetails && burnDetails.transaction ? (
                 <p>
                     <b>{from.name} tx:</b>{" "}
-                    {from.transactionExplorerLink ? (
+                    {from.utils.transactionExplorerLink ? (
                         <ExternalLink
-                            href={from.transactionExplorerLink(
+                            href={from.utils.transactionExplorerLink(
                                 burnDetails.transaction
                             )}
                         >

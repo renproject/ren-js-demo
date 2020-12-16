@@ -2,6 +2,7 @@
 
 // The following are also available from a combined "@renproject/chains" package.
 import { Filecoin } from "@renproject/chains-filecoin";
+import { Terra } from "@renproject/chains-terra";
 import { BinanceSmartChain, Ethereum } from "@renproject/chains-ethereum";
 import {
     Bitcoin,
@@ -22,6 +23,7 @@ import { Ox, sleep } from "@renproject/utils";
 import { BurnAndRelease } from "@renproject/ren/build/main/burnAndRelease";
 import BigNumber from "bignumber.js";
 
+import { NETWORK } from "../network";
 import { BurnDetails, DepositDetails } from "../ui/useTransactionStorage";
 import { Asset, Chain } from "./chains";
 
@@ -38,25 +40,30 @@ export const getMintChainObject = (
     recipientAddress?: string,
     amount?: string
 ): MintChain => {
+    const b = Buffer.from([]);
+
     switch (mintChain) {
         case Chain.Ethereum:
-            let eth = Ethereum(mintChainProvider);
+            let eth = Ethereum(mintChainProvider, NETWORK);
             eth = recipientAddress
                 ? eth.Account({
                       address: recipientAddress,
                       value: amount,
                   })
                 : eth;
-            return eth;
+            return eth as any;
         case Chain.BSC:
-            let bsc = BinanceSmartChain(mintChainProvider, "mainnet");
+            let bsc = BinanceSmartChain(
+                mintChainProvider,
+                NETWORK.isTestnet ? "testnet" : "mainnet"
+            );
             bsc = recipientAddress
                 ? bsc.Account({
                       address: recipientAddress,
                       value: amount,
                   })
                 : bsc;
-            return bsc;
+            return bsc as any;
         default:
             throw new Error(`Unsupported chain ${mintChain}.`);
     }
@@ -71,26 +78,29 @@ export const startMint = async (
     showAddress: (
         address: string | { address: string; params?: string }
     ) => void,
+    setMinimumAmount: (amount: string) => void,
     onDeposit: (txHash: string, deposit: LockAndMintDeposit) => void
 ) => {
     let from: LockChain;
     switch (asset) {
         case Asset.BTC:
-            // TODO: Fix typing issues.
-            from = (Bitcoin() as unknown) as LockChain;
+            from = Bitcoin();
             break;
         case Asset.ZEC:
-            from = (Zcash() as unknown) as LockChain;
+            from = Zcash();
             break;
         case Asset.BCH:
-            from = (BitcoinCash() as unknown) as LockChain;
+            from = BitcoinCash();
             break;
         case Asset.FIL:
-            from = (Filecoin() as unknown) as LockChain;
+            from = Filecoin();
             break;
-        // case Asset.DOGE:
-        //     from = (Dogecoin() as unknown) as LockChain;
-        //     break;
+        case Asset.LUNA:
+            from = Terra();
+            break;
+        case Asset.DOGE:
+            from = Dogecoin();
+            break;
         default:
             throw new Error(`Unsupported asset ${asset}.`);
     }
@@ -99,6 +109,13 @@ export const startMint = async (
         mintChainProvider,
         recipientAddress
     );
+
+    const decimals = await from.assetDecimals(asset);
+    const fees = await renJS.getFees({ asset, from, to });
+    const minimumAmount = new BigNumber(fees.mint).dividedBy(
+        new BigNumber(10).exponentiatedBy(decimals)
+    );
+    setMinimumAmount(minimumAmount.toFixed());
 
     const lockAndMint = await renJS.lockAndMint({
         asset,
@@ -142,12 +159,6 @@ export const handleDeposit = async (
                 nhash: deposit._state.nHash!,
             },
         } as any
-    );
-    console.log(
-        "nHash: ",
-        Ox(deposit._state.nHash!),
-        "findTransaction:",
-        findTransaction
     );
     if (findTransaction) {
         onStatus(DepositStatus.DONE);
@@ -228,19 +239,35 @@ export const startBurn = async (
         status: Partial<BurnDetails> | Partial<DepositDetails>
     ) => void
 ): Promise<BurnAndRelease> => {
-    let to;
+    let to: LockChain;
     switch (asset) {
+        case Asset.BTC:
+            // TODO: Fix typing issues.
+            to = Bitcoin().Address(recipientAddress);
+            break;
+        case Asset.ZEC:
+            to = Zcash().Address(recipientAddress);
+            break;
+        case Asset.BCH:
+            to = BitcoinCash().Address(recipientAddress);
+            break;
         case Asset.FIL:
             to = Filecoin().Address(recipientAddress);
             break;
-        case Asset.BTC:
-            to = Bitcoin().Address(recipientAddress);
+        case Asset.LUNA:
+            to = Terra().Address(recipientAddress);
+            break;
+        case Asset.DOGE:
+            to = Dogecoin().Address(recipientAddress);
             break;
         default:
             throw new Error(`Unsupported asset ${asset}.`);
     }
+    if (to.utils.addressIsValid && !to.utils.addressIsValid(recipientAddress)) {
+        throw new Error(`Invalid recipient address ${recipientAddress}`);
+    }
     const value = new BigNumber(amount)
-        .times(new BigNumber(10).exponentiatedBy(to.assetDecimals(asset)))
+        .times(new BigNumber(10).exponentiatedBy(await to.assetDecimals(asset)))
         .toFixed();
     const from: MintChain = getMintChainObject(
         mintChain,
@@ -251,9 +278,9 @@ export const startBurn = async (
 
     const burnAndRelease = await renJS.burnAndRelease({
         asset,
-        from,
+        from: from as any,
         // TODO: Fix typing issues.
-        to: (to as any) as LockChain,
+        to: ((to as any) as LockChain) as any,
     });
 
     // const burnPayload =
