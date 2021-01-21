@@ -9,13 +9,13 @@
  */
 
 import Web3 from "web3";
-import { Ethereum } from "@renproject/chains-ethereum";
+import { Ethereum, EthereumConfigMap } from "@renproject/chains-ethereum";
 import { AbiItem, RenNetwork } from "@renproject/interfaces";
 import BigNumber from "bignumber.js";
 import { HttpProvider } from "web3-providers";
 
 import ERC20ABI from "../lib/ABIs/erc20ABI.json";
-import { NETWORK } from "../network";
+import { getNetwork, NETWORK } from "../network";
 import { Chain } from "./chains";
 import { getMintChainObject } from "./mint";
 
@@ -38,26 +38,23 @@ const getBalance = async (
     mintChainProvider: any,
     token: string
 ): Promise<string> => {
-    const legacy =
-        (token === "BTC" || token === "ZEC" || token === "BCH") &&
-        mintChain === Chain.Ethereum;
-
     const web3 = new Web3(mintChainProvider);
+
+    const network = getNetwork(mintChain, token, NETWORK.isTestnet);
+    const expectedNetwork = EthereumConfigMap[network];
+
+    const connectedNetID = await new Web3(mintChainProvider).eth.net.getId();
+    if (connectedNetID !== expectedNetwork.networkID) {
+        throw new Error(
+            `Wrong wallet network ${connectedNetID} - expected ${expectedNetwork.networkID}.`
+        );
+    }
     const web3Address = (await web3.eth.getAccounts())[0];
     const tokenAddress = await (getMintChainObject(
         mintChain,
-        mintChainProvider
-    ) as Ethereum)
-        .initialize(
-            NETWORK.isTestnet
-                ? legacy
-                    ? RenNetwork.Testnet
-                    : RenNetwork.TestnetVDot3
-                : legacy
-                ? RenNetwork.Mainnet
-                : RenNetwork.MainnetVDot3
-        )
-        .getTokenContractAddress(token);
+        mintChainProvider,
+        token
+    ) as Ethereum).getTokenContractAddress(token);
     const tokenContract = new web3.eth.Contract(
         ERC20ABI as AbiItem[],
         tokenAddress

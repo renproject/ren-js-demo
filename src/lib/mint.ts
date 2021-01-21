@@ -11,6 +11,7 @@ import {
     Zcash,
 } from "@renproject/chains-bitcoin";
 import {
+    getRenNetworkDetails,
     LockChain,
     LogLevel,
     MintChain,
@@ -19,7 +20,7 @@ import {
 } from "@renproject/interfaces";
 import RenJS from "@renproject/ren";
 import { LockAndMintDeposit } from "@renproject/ren/build/main/lockAndMint";
-import { Ox, sleep } from "@renproject/utils";
+import { sleep } from "@renproject/utils";
 import { BurnAndRelease } from "@renproject/ren/build/main/burnAndRelease";
 import BigNumber from "bignumber.js";
 
@@ -27,7 +28,7 @@ import { NETWORK } from "../network";
 import { BurnDetails, DepositDetails } from "../ui/useTransactionStorage";
 import { Asset, Chain } from "./chains";
 
-export const logLevel = LogLevel.Log;
+export const logLevel = LogLevel.Trace;
 
 /*******************************************************************************
  * MINTING
@@ -37,14 +38,23 @@ export const logLevel = LogLevel.Log;
 export const getMintChainObject = (
     mintChain: Chain,
     mintChainProvider: any,
+    asset: string,
     recipientAddress?: string,
     amount?: string
 ): MintChain => {
-    const b = Buffer.from([]);
+    // const b = Buffer.from([]);
 
     switch (mintChain) {
         case Chain.Ethereum:
-            let eth = Ethereum(mintChainProvider, NETWORK);
+            let network = NETWORK;
+            if (asset && ["BTC", "ZEC", "BCH"].indexOf(asset) >= 0) {
+                if (network.name === "mainnet-v0.3") {
+                    network = getRenNetworkDetails("mainnet");
+                } else if (network.name === "testnet-v0.3") {
+                    network = getRenNetworkDetails("testnet");
+                }
+            }
+            let eth = Ethereum(mintChainProvider, network);
             eth = recipientAddress
                 ? eth.Account({
                       address: recipientAddress,
@@ -107,11 +117,17 @@ export const startMint = async (
     const to: MintChain = getMintChainObject(
         mintChain,
         mintChainProvider,
+        asset,
         recipientAddress
     );
 
     const decimals = await from.assetDecimals(asset);
-    const fees = await renJS.getFees({ asset, from, to });
+    const fees = await renJS.getFees({
+        asset,
+        // TODO: Fix typing issues.
+        from: from as any,
+        to: to as any,
+    });
     const minimumAmount = new BigNumber(fees.mint).dividedBy(
         new BigNumber(10).exponentiatedBy(decimals)
     );
@@ -119,8 +135,9 @@ export const startMint = async (
 
     const lockAndMint = await renJS.lockAndMint({
         asset,
-        from,
-        to,
+        // TODO: Fix typing issues.
+        from: from as any,
+        to: to as any,
     });
 
     if (lockAndMint.gatewayAddress) {
@@ -149,8 +166,10 @@ export const handleDeposit = async (
     onRenVMStatus: (status: TxStatus) => void,
     onTransactionHash: (txHash: string) => void
 ) => {
+    console.log("Step: deposit.txHash()");
     const hash = await deposit.txHash();
 
+    console.log("Step: deposit.params.to.findTransaction()");
     const findTransaction = await deposit.params.to.findTransaction(
         deposit.params.asset,
         {
@@ -160,7 +179,9 @@ export const handleDeposit = async (
             },
         } as any
     );
+    console.log("findTransaction", findTransaction);
     if (findTransaction) {
+        console.log("Step: returning");
         onStatus(DepositStatus.DONE);
         return;
     }
@@ -169,6 +190,8 @@ export const handleDeposit = async (
         logLevel,
         `[${hash.slice(0, 6)}] `
     );
+
+    console.log("calling deposit.confirmed()");
 
     await deposit
         .confirmed()
@@ -263,6 +286,7 @@ export const startBurn = async (
         default:
             throw new Error(`Unsupported asset ${asset}.`);
     }
+    await to.initialize(NETWORK);
     if (to.utils.addressIsValid && !to.utils.addressIsValid(recipientAddress)) {
         throw new Error(`Invalid recipient address ${recipientAddress}`);
     }
@@ -272,6 +296,7 @@ export const startBurn = async (
     const from: MintChain = getMintChainObject(
         mintChain,
         mintChainProvider,
+        asset,
         fromAddress,
         value
     );

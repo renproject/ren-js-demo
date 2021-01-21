@@ -47,6 +47,7 @@ export const DepositObject: React.FC<Props> = ({
 
     const onStatus = React.useCallback(
         (newStatus: DepositStatus) => {
+            console.log("Step: handling status", newStatus);
             updateTransaction(txHash, { status: newStatus });
         },
         [updateTransaction, txHash]
@@ -61,6 +62,7 @@ export const DepositObject: React.FC<Props> = ({
     >(null);
     const onConfirmation = React.useCallback(
         (confs: number, target: number) => {
+            console.log("Step: handle confirmation", confs, target);
             setConfirmations(confs);
             setTargetConfirmations(target);
         },
@@ -76,6 +78,7 @@ export const DepositObject: React.FC<Props> = ({
 
     const step1 = React.useCallback(() => {
         onStatus(DepositStatus.DETECTED);
+        console.log("Step: calling handleDeposit");
         handleDeposit(
             deposit,
             onStatus,
@@ -83,6 +86,7 @@ export const DepositObject: React.FC<Props> = ({
             setRenVMStatus,
             setMintTransaction
         ).catch((error) => {
+            console.error(error);
             setErrorMessage(String(error.message || error));
             onStatus(DepositStatus.ERROR);
         });
@@ -97,6 +101,7 @@ export const DepositObject: React.FC<Props> = ({
 
     React.useEffect(() => {
         (async () => {
+            console.log("Step: inside useEffect");
             step1();
 
             const decimals = await from.assetDecimals(asset);
@@ -115,6 +120,7 @@ export const DepositObject: React.FC<Props> = ({
         try {
             await submitDeposit(deposit, onStatus, setMintTransaction);
         } catch (error) {
+            console.error(error);
             setErrorMessage(String(error.message || error));
         }
         setSubmitting(false);

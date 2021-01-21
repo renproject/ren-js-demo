@@ -45,7 +45,9 @@ export const Main = () => {
         []
     );
 
-    const [errorMessage] = React.useState(null as string | null);
+    const [errorMessage, setErrorMessage] = React.useState(
+        null as string | null
+    );
 
     const [balance, setBalance] = React.useState<string | null>(null);
 
@@ -54,6 +56,8 @@ export const Main = () => {
 
     const updateBalance = React.useCallback(
         (assetIn?: Asset) => {
+            setErrorMessage(null);
+
             if (assetIn && assetIn !== asset) {
                 return;
             }
@@ -63,7 +67,7 @@ export const Main = () => {
             if (mintChainProvider) {
                 Wallet.getBalance(mintChain, mintChainProvider, asset)
                     .then(setBalance)
-                    .catch(console.error);
+                    .catch((error) => setErrorMessage(error.toString()));
             } else {
                 setBalance("?");
             }
