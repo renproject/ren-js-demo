@@ -1,8 +1,8 @@
 {
   "files": {
     "main.css": "/ren-js-demo/static/css/main.85021f84.chunk.css",
-    "main.js": "/ren-js-demo/static/js/main.a1f3ece6.chunk.js",
-    "main.js.map": "/ren-js-demo/static/js/main.a1f3ece6.chunk.js.map",
+    "main.js": "/ren-js-demo/static/js/main.9408fd55.chunk.js",
+    "main.js.map": "/ren-js-demo/static/js/main.9408fd55.chunk.js.map",
     "runtime-main.js": "/ren-js-demo/static/js/runtime-main.07a6959c.js",
     "runtime-main.js.map": "/ren-js-demo/static/js/runtime-main.07a6959c.js.map",
     "static/js/2.1cb893f0.chunk.js": "/ren-js-demo/static/js/2.1cb893f0.chunk.js",
@@ -21,6 +21,6 @@
     "static/js/runtime-main.07a6959c.js",
     "static/js/2.1cb893f0.chunk.js",
     "static/css/main.85021f84.chunk.css",
-    "static/js/main.a1f3ece6.chunk.js"
+    "static/js/main.9408fd55.chunk.js"
   ]
 }
